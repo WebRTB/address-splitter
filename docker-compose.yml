@@ -1,0 +1,18 @@
+version: "3.2"
+
+networks:
+  internal:
+    external: false
+
+services:
+  # APP
+  app:
+    container_name: address-splitter-app
+    build:
+      context: ./
+      dockerfile: "./docker/app/Dockerfile"
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html:cached
+    networks:
+      - internal

@@ -1,0 +1,30 @@
+{
+  "name": "webrtb/address-splitter",
+  "description": "Split street, house number and addition from address.",
+  "keywords": [
+    "split",
+    "address",
+    "street",
+    "housenumber",
+    "addition"
+  ],
+  "type": "project",
+  "license": "proprietary",
+  "require": {
+    "php": "*"
+  },
+  "require-dev": {
+    "fzaninotto/faker": "1.9.1",
+    "phpunit/phpunit": "9.2.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "WebRTB\\AddressSplitter\\App\\": "src/app/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WebRTB\\AddressSplitter\\Tests\\": "src/tests/"
+    }
+  }
+}
