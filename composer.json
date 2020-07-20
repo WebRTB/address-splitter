@@ -11,11 +11,14 @@
   "type": "project",
   "license": "proprietary",
   "require": {
-    "php": "*"
+    "php": "*",
+    "symfony/string": "^5.1",
+    "ext-json": "*"
   },
   "require-dev": {
     "fzaninotto/faker": "1.9.1",
-    "phpunit/phpunit": "9.2.2"
+    "phpunit/phpunit": "9.2.2",
+    "symfony/var-dumper": "^5.1"
   },
   "autoload": {
     "psr-4": {

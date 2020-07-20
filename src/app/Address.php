@@ -2,31 +2,140 @@
 
 namespace WebRTB\AddressSplitter\App;
 
+use JsonSerializable;
+
 /**
  * Class Address
  * @package WebRTB\AddressSplitter\App
  */
-class Address
-{	
-	/**
-     * Main function that splits the address fields
+class Address implements JsonSerializable
+{
+    /**
+     * @var string
+     */
+    protected $orginalInput;
+
+    /**
+     * @var string
+     */
+    protected $street;
+
+    /**
+     * @var string
+     */
+    protected $housenumber;
+
+    /**
+     * @var string
+     */
+    protected $addition;
+
+    public function __construct(string $inputAddress)
+    {
+        $this->orginalInput = $inputAddress;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOrginalInput(): string
+    {
+        return $this->orginalInput;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStrippedInput(): string
+    {
+        $input = $this->getOrginalInput();
+
+        // Remove new lines, tabs and trailing spaces from input
+        $input = trim(preg_replace('/\s+/S', " ", $input));
+
+        // Remove known unimportant annotations
+        $input = str_replace([
+            'Flat ',
+            'Studio ',
+            'Bourgondië, '
+        ], '', $input);
+
+        return $input;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStreet(): string
+    {
+        return $this->street ?? "";
+    }
+
+    /**
+     * @param string $street
+     */
+    public function setStreet(string $street): void
+    {
+        $this->street = $street;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHousenumber(): string
+    {
+        return $this->housenumber ?? "";
+    }
+
+    /**
+     * @param string $housenumber
+     */
+    public function setHousenumber(string $housenumber): void
+    {
+        $this->housenumber = $housenumber;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAddition(): string
+    {
+        return $this->addition ?? "";
+    }
+
+    /**
+     * @param string $addition
+     */
+    public function setAddition(string $addition): void
+    {
+        $this->addition = $addition;
+    }
+
+    /**
+     * Get array representation of address
      *
-     * @see https://gist.github.com/benvds/350404
-     * @see https://stackoverflow.com/questions/24305532/split-street-house-number-and-addition-from-address
-     * @see https://gist.github.com/christiaanwesterbeek/c574beaf73adcfd74997
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [$this->getStreet(), $this->getHousenumber(), $this->getAddition()];
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return implode(' ', $this->toArray());
+    }
+
+    /**
+     * JSON serialize address
      *
-	 * @param string $address
-	 * @return array with splitted adress fields
-	 */
-	public static function split(string $address): array
-	{
-		$hasMatch = preg_match('/^(\d*[\wäöüß\d \'\-\.]+)[,\s]+(\d+)\s*([\wäöüß\d\-\/]*)$/', $address, $match);
-		if ($hasMatch) {
-			array_shift($match); // remove element 0 (the entire match)
-    		//match is now always an array with length of 3
-			return $match;
-		} else {
-			return [$address, "", ""];
-		}
-	}
+     * @return mixed|void
+     */
+    public function jsonSerialize()
+    {
+        $this->toArray();
+    }
 }

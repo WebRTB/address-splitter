@@ -3,8 +3,9 @@
 namespace WebRTB\AddressSplitter\Tests;
 
 use Faker\Factory;
+use Faker\Provider\nl_NL\Address;
 use PHPUnit\Framework\TestCase;
-use WebRTB\AddressSplitter\App\Address;
+use WebRTB\AddressSplitter\App\Split;
 
 /**
  * Class AbstractTestCase
@@ -16,13 +17,21 @@ abstract class AbstractTestCase extends TestCase
      * Test split address class with faker for specific locale
      *
      * @param string $locale String representing faker language
+     * @param bool $numberComesFirst
+     * @param bool $housenumber
      * @param int $times Nr of times to run faker
+     * @param bool $debug
      * @return void
      */
-    protected function runWithFaker(string $locale, int $times = 25): void
+    protected function runWithFaker(
+        string $locale,
+        bool $numberComesFirst = false,
+        bool $housenumber = true,
+        int $times = 100,
+        int $debug = 0): void
     {
         /**
-         * @var \Faker\Provider\nl_NL\Address $faker
+         * @var Address $faker
          */
         $faker = Factory::create($locale);
 
@@ -32,9 +41,33 @@ abstract class AbstractTestCase extends TestCase
             $addresses[] = $faker->streetAddress();
         }
 
+        $this->runArrayWithAddresses($addresses, $locale, $numberComesFirst, $housenumber, $debug);
+    }
+
+    /**
+     * @param array $addresses
+     * @param string $locale
+     * @param bool $numberComesFirst
+     * @param bool $housenumber
+     * @param int $debug
+     */
+    protected function runArrayWithAddresses(
+        array $addresses,
+        string $locale,
+        bool $numberComesFirst = false,
+        bool $housenumber = true,
+        int $debug = 0): void
+    {
+        $stats = ["streets" => 0, "housenumbers" => 0, "additions" => 0];
         foreach ($addresses as $key => $value) {
 
-            $result = Address::split($value);
+            $result = Split::split($value, $numberComesFirst);
+            $result['original'] = $value;
+
+            // Dump results if debug is enabled
+            if ($key < $debug) {
+                dump($result);
+            }
 
             // See if all keys are there
             $this->assertArrayHasKey(0, $result, $value);
@@ -43,13 +76,25 @@ abstract class AbstractTestCase extends TestCase
             $this->assertArrayNotHasKey(3, $result, $value);
 
             // Test strings filled
-            $this->assertTrue(!empty($result[0]), sprintf('Street is not filled: %s', $value));
-            $this->assertTrue(!empty($result[1]), sprintf('Housenumber is not filled: %s', $value));
+            $this->assertTrue(
+                !empty($result[0]),
+                sprintf('Street is not filled: %s', print_r($result, true))
+            );
+            if ($housenumber) {
+                $this->assertTrue(
+                    isset($result[1]),
+                    sprintf('Housenumber is not filled: %s', print_r($result, true))
+                );
+            }
 
-            // Test strings contains
-            $this->assertStringContainsString($result[0], $addresses[$key]);
-            $this->assertStringContainsString($result[1], $addresses[$key]);
-            $this->assertStringContainsString($result[2], $addresses[$key]);
+            if (!empty($result[0])) { $stats["streets"]++; }
+            if (!empty($result[1])) { $stats["housenumbers"]++; }
+            if (!empty($result[2])) { $stats["additions"]++; }
+        }
+
+        // Dump stats if debug is enabled
+        if ($debug) {
+            dump([$locale => $stats]);
         }
     }
 }

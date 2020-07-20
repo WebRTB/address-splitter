@@ -2,11 +2,14 @@
 
 namespace WebRTB\AddressSplitter\Tests\Unit;
 
-use WebRTB\AddressSplitter\App\Address;
+use WebRTB\AddressSplitter\App\Split;
 use WebRTB\AddressSplitter\Tests\AbstractTestCase;
 
 /**
  * Class BaseTest
+ *
+ * This class is meant to test specific addresses that are known to fail or represent special cases
+ *
  * @package WebRTB\AddressSplitter\Tests\Unitå
  */
 class BaseTest extends AbstractTestCase
@@ -16,9 +19,9 @@ class BaseTest extends AbstractTestCase
      *
      * @return void
      */
-    public function testSplitVoorbeeldstraat()
+    public function testSplit()
     {
-        $testvars = [
+        $addresses = [
             'Voorbeeldstraat 24',
             'Voorbeeldstraat 24 ',
             'Voorbeeldstraat 24a',
@@ -39,31 +42,25 @@ class BaseTest extends AbstractTestCase
             'Höhenstraße 5A',
             'Saturnusstraat 60-75',
             'Saturnusstraat 60 - 75',
-            // '1, rue de l\'eglise',
+            'Plein \'40-\'45 10',
+            'Plein 1945 1',
+            'Steenkade t/o 56',
+            'Steenkade a/b Twee Gezusters 8',
         ];
+        $this->runArrayWithAddresses($addresses, 'base', false, true, 40);
+    }
 
-        // Make sure empty strings are not excepted
-        $this->assertEquals(['', '', ''], Address::split(""));
-
-        $results = [];
-        foreach ($testvars as $key => $value) {
-
-            $result = Address::split($value);
-
-            // See if all keys are there
-            $this->assertArrayHasKey(0, $result, $value);
-            $this->assertArrayHasKey(1, $result, $value);
-            $this->assertArrayHasKey(2, $result, $value);
-            $this->assertArrayNotHasKey(3, $result, $value);
-
-            // Test strings filled
-            $this->assertTrue(!empty($result[0]), sprintf('Street is not filled: %s', $value));
-            $this->assertTrue(!empty($result[1]), sprintf('Housenumber is not filled: %s', $value));
-
-            // Test strings contains
-            $this->assertStringContainsString($result[0], $testvars[$key]);
-            $this->assertStringContainsString($result[1], $testvars[$key]);
-            $this->assertStringContainsString($result[2], $testvars[$key]);
-        }
+    /**
+     * A basic test example where a housenumber comes first
+     *
+     * @return void
+     */
+    public function testSplitNumberFirst()
+    {
+        $addresses = [
+            '1, rue de l\'eglise',
+            '27 Old Gloucester St'
+        ];
+        $this->runArrayWithAddresses($addresses, 'base', true, true, 0);
     }
 }
