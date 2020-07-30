@@ -2,7 +2,6 @@
 
 namespace WebRTB\AddressSplitter\Tests\Unit;
 
-use WebRTB\AddressSplitter\App\Split;
 use WebRTB\AddressSplitter\Tests\AbstractTestCase;
 
 /**

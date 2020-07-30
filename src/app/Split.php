@@ -2,6 +2,8 @@
 
 namespace WebRTB\AddressSplitter\App;
 
+use WebRTB\AddressSplitter\App\Exceptions\SplitAddressException;
+
 /**
  * Class Address
  * @package WebRTB\AddressSplitter\App
@@ -17,31 +19,36 @@ class Split
      *
      * @param string $inputAddress
      * @param bool $numberComesFirst
+     * @param bool $exceptions
      * @return array with splitted adress fields
+     * @throws SplitAddressException
      */
-	public static function split(string $inputAddress, bool $numberComesFirst = false): array
-	{
-	    // String of special characters in address input that are allowed
-	    $c = 'äáàâåöóòôüúùûëéèêïíìîýÿÄÁÀÂÖÓÒÔÜÚÙÛËÉÈÊÏÍÌÎÝßñÑŞÇçğšæÆ';
+    public static function split(
+        string $inputAddress,
+        bool $numberComesFirst = false,
+        bool $exceptions = false): array
+    {
+        // String of special characters in address input that are allowed
+        $c = 'äáàâåöóòôüúùûëéèêïíìîýÿÄÁÀÂÖÓÒÔÜÚÙÛËÉÈÊÏÍÌÎÝßñÑŞÇçğšæÆ';
 
         $address = new Address($inputAddress);
-	    if ($numberComesFirst) {
+        if ($numberComesFirst) {
             $hasMatch = preg_match(
                 "/^(\d+)([\w\/\‘\'\-\.]*)[,\s]+(\d*[\w{$c}\d \/\‘\'\-\.]+)$/",
                 $address->getStrippedInput(),
                 $match
             );
         } else {
-		    $hasMatch = preg_match(
-		        "/^(\d*[\w{$c}\d \/\‘\'\-\.]+)[,\s]+(\d+)[\s]*([\w{$c}\d\-\/]*)$/",
+            $hasMatch = preg_match(
+                "/^(\d*[\w{$c}\d \/\‘\'\-\.]+)[,\s]+(\d+)[\s]*([\w{$c}\d\-\/]*)$/",
                 $address->getStrippedInput(),
                 $match
             );
-	    }
+        }
 
-		if ($hasMatch) {
-			array_shift($match); // remove element 0 (the entire match)
-    		//match is now always an array with length of 3
+        if ($hasMatch) {
+            array_shift($match); // remove element 0 (the entire match)
+            //match is now always an array with length of 3
 
             if ($numberComesFirst) {
                 $address->setStreet($match[2]);
@@ -53,12 +60,16 @@ class Split
                 $address->setAddition($match[2]);
             }
 
-			return $address->toArray();
+            return $address->toArray();
 
-		} else {
+        } elseif ($exceptions) {
 
-			return [$address->getOrginalInput(), null, null];
+            throw new SplitAddressException("Parsed address could not be split", 0, $address);
 
-		}
-	}
+        } else {
+
+            return [$address->getOrginalInput(), null, null];
+
+        }
+    }
 }

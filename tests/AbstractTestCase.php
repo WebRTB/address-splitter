@@ -20,7 +20,7 @@ abstract class AbstractTestCase extends TestCase
      * @param bool $numberComesFirst
      * @param bool $housenumber
      * @param int $times Nr of times to run faker
-     * @param bool $debug
+     * @param int $debug
      * @return void
      */
     protected function runWithFaker(
@@ -36,8 +36,7 @@ abstract class AbstractTestCase extends TestCase
         $faker = Factory::create($locale);
 
         $addresses = [];
-        for ($i = 0; $i < $times; $i++)
-        {
+        for ($i = 0; $i < $times; $i++) {
             $addresses[] = $faker->streetAddress();
         }
 
@@ -80,16 +79,20 @@ abstract class AbstractTestCase extends TestCase
                 !empty($result[0]),
                 sprintf('Street is not filled: %s', print_r($result, true))
             );
-            if ($housenumber) {
-                $this->assertTrue(
-                    isset($result[1]),
-                    sprintf('Housenumber is not filled: %s', print_r($result, true))
-                );
-            }
+            $this->assertTrue(
+                !$housenumber || isset($result[1]),
+                sprintf('Housenumber is not filled: %s', print_r($result, true))
+            );
 
-            if (!empty($result[0])) { $stats["streets"]++; }
-            if (!empty($result[1])) { $stats["housenumbers"]++; }
-            if (!empty($result[2])) { $stats["additions"]++; }
+            if (!empty($result[0])) {
+                $stats["streets"]++;
+            }
+            if (!empty($result[1])) {
+                $stats["housenumbers"]++;
+            }
+            if (!empty($result[2])) {
+                $stats["additions"]++;
+            }
         }
 
         // Dump stats if debug is enabled

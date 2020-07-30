@@ -1,0 +1,9 @@
+build: true
+checks:
+    php: true
+coding_style:
+    php: {  }
+filter:
+    paths:
+        - src/*
+        - tests/*
